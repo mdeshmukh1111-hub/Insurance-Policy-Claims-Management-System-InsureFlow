@@ -1,0 +1,905 @@
+/* =====================================================================
+   InsureFlow - Application Logic & Single-Page Router (Vanilla JS)
+   ===================================================================== */
+
+let currentRole = 'ADMIN'; // ADMIN, CUSTOMER, AGENT
+let activeTab = 'dashboard';
+let currentCustomers = [];
+let currentAgents = [];
+let currentPolicies = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+});
+
+async function initApp() {
+    setupRoleSwitcher();
+    setupNavEvents();
+    await loadActiveUserDropdowns();
+    renderActiveTab();
+}
+
+function setupRoleSwitcher() {
+    const pills = document.querySelectorAll('.role-pill');
+    pills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentRole = pill.dataset.role;
+            updateNavForRole();
+            renderActiveTab();
+            showToast(`Switched active view to ${currentRole} Mode`);
+        });
+    });
+}
+
+function updateNavForRole() {
+    const navButtons = document.querySelectorAll('.nav-item button');
+    navButtons.forEach(btn => {
+        const tab = btn.dataset.tab;
+        if (currentRole === 'CUSTOMER') {
+            if (['customers', 'agents', 'policy-types', 'dbms'].includes(tab)) {
+                btn.parentElement.style.display = 'none';
+            } else {
+                btn.parentElement.style.display = 'inline-block';
+            }
+        } else if (currentRole === 'AGENT') {
+            if (['agents', 'policy-types', 'dbms'].includes(tab)) {
+                btn.parentElement.style.display = 'none';
+            } else {
+                btn.parentElement.style.display = 'inline-block';
+            }
+        } else {
+            btn.parentElement.style.display = 'inline-block';
+        }
+    });
+
+    if (currentRole === 'CUSTOMER' && ['customers', 'agents', 'policy-types', 'dbms'].includes(activeTab)) {
+        activeTab = 'dashboard';
+    }
+}
+
+function setupNavEvents() {
+    const navButtons = document.querySelectorAll('.nav-item button');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTab = btn.dataset.tab;
+            renderActiveTab();
+        });
+    });
+}
+
+async function loadActiveUserDropdowns() {
+    try {
+        currentCustomers = await API.getCustomers();
+        currentAgents = await API.getAgents();
+
+        const custSelect = document.getElementById('active-customer-select');
+        if (custSelect && currentCustomers.length > 0) {
+            custSelect.innerHTML = currentCustomers.map(c => `<option value="${c.id}">${c.firstName} ${c.lastName} (${c.customerCode})</option>`).join('');
+        }
+
+        const agentSelect = document.getElementById('active-agent-select');
+        if (agentSelect && currentAgents.length > 0) {
+            agentSelect.innerHTML = currentAgents.map(a => `<option value="${a.id}">${a.firstName} ${a.lastName} (${a.agentCode})</option>`).join('');
+        }
+    } catch (err) {
+        console.error('Failed loading dropdowns:', err);
+    }
+}
+
+function getSelectedCustomerId() {
+    const select = document.getElementById('active-customer-select');
+    return select ? select.value : 1;
+}
+
+function getSelectedAgentId() {
+    const select = document.getElementById('active-agent-select');
+    return select ? select.value : 1;
+}
+
+async function renderActiveTab() {
+    const content = document.getElementById('app-content');
+    content.innerHTML = '<div style="text-align: center; padding: 3rem;"><p>Loading data...</p></div>';
+
+    try {
+        switch (activeTab) {
+            case 'dashboard':
+                await renderDashboardView(content);
+                break;
+            case 'customers':
+                await renderCustomersView(content);
+                break;
+            case 'agents':
+                await renderAgentsView(content);
+                break;
+            case 'policies':
+                await renderPoliciesView(content);
+                break;
+            case 'claims':
+                await renderClaimsView(content);
+                break;
+            case 'payments':
+                await renderPaymentsView(content);
+                break;
+            case 'renewals':
+                await renderRenewalsView(content);
+                break;
+            case 'dsa':
+                renderDSAView(content);
+                break;
+            case 'dbms':
+                renderDBMSView(content);
+                break;
+            default:
+                await renderDashboardView(content);
+        }
+    } catch (err) {
+        content.innerHTML = `<div style="color: var(--accent-rose); padding: 2rem;">Error rendering view: ${err.message}</div>`;
+    }
+}
+
+/* 1. DASHBOARD VIEW */
+async function renderDashboardView(container) {
+    let stats = {};
+    if (currentRole === 'ADMIN') {
+        stats = await API.getAdminDashboardStats();
+    } else if (currentRole === 'CUSTOMER') {
+        stats = await API.getCustomerDashboardStats(getSelectedCustomerId());
+    } else {
+        stats = await API.getAgentDashboardStats(getSelectedAgentId());
+    }
+
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">${currentRole} Dashboard</h1>
+                <p class="page-subtitle">Real-time overview of key metrics, policy statuses, and claims workflow</p>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="openCreatePolicyModal()">+ New Policy</button>
+            </div>
+        </div>
+        <div class="stats-grid">
+    `;
+
+    if (currentRole === 'ADMIN') {
+        html += `
+            <div class="stat-card">
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-value">${stats.totalCustomers || 0}</div>
+            </div>
+            <div class="stat-card teal">
+                <div class="stat-label">Active Agents</div>
+                <div class="stat-value">${stats.totalAgents || 0}</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-label">Active Policies</div>
+                <div class="stat-value">${stats.activePolicies || 0}</div>
+            </div>
+            <div class="stat-card rose">
+                <div class="stat-label">Pending Claims</div>
+                <div class="stat-value">${stats.pendingClaims || 0}</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">Premium Collected</div>
+                <div class="stat-value">$${(stats.totalPremiumCollected || 0).toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Settlement Disbursed</div>
+                <div class="stat-value">$${(stats.totalClaimSettlementAmount || 0).toLocaleString()}</div>
+            </div>
+        `;
+    } else if (currentRole === 'CUSTOMER') {
+        html += `
+            <div class="stat-card">
+                <div class="stat-label">My Total Policies</div>
+                <div class="stat-value">${stats.totalPolicies || 0}</div>
+            </div>
+            <div class="stat-card teal">
+                <div class="stat-label">Active Coverage</div>
+                <div class="stat-value">${stats.activePolicies || 0}</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-label">Premium Due</div>
+                <div class="stat-value">$${(stats.premiumDue || 0).toLocaleString()}</div>
+            </div>
+            <div class="stat-card rose">
+                <div class="stat-label">Active Claims</div>
+                <div class="stat-value">${stats.pendingClaims || 0}</div>
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="stat-card">
+                <div class="stat-label">Assigned Customers</div>
+                <div class="stat-value">${stats.assignedCustomers || 0}</div>
+            </div>
+            <div class="stat-card teal">
+                <div class="stat-label">Active Policies</div>
+                <div class="stat-value">${stats.activePolicies || 0}</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-label">Pending Renewals</div>
+                <div class="stat-value">${stats.pendingRenewals || 0}</div>
+            </div>
+            <div class="stat-card rose">
+                <div class="stat-label">Claims Under Review</div>
+                <div class="stat-value">${stats.pendingClaims || 0}</div>
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+
+    // Add recent policies table
+    const policies = await API.getPolicies();
+    html += `
+        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Recent Insurance Policies</h2>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Policy #</th>
+                        <th>Customer</th>
+                        <th>Policy Type</th>
+                        <th>Coverage</th>
+                        <th>Premium</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    policies.forEach(p => {
+        html += `
+            <tr>
+                <td><strong>${p.policyNumber}</strong></td>
+                <td>${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'N/A'}</td>
+                <td>${p.policyType ? p.policyType.name : 'N/A'}</td>
+                <td>$${p.coverageAmount.toLocaleString()}</td>
+                <td>$${p.premiumAmount.toLocaleString()}</td>
+                <td>${p.expiryDate}</td>
+                <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openRecordPaymentModal(${p.id})">Pay Premium</button>
+                    <button class="btn btn-primary btn-sm" onclick="openSubmitClaimModal(${p.id})">Submit Claim</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 2. CUSTOMERS VIEW */
+async function renderCustomersView(container) {
+    const customers = await API.getCustomers();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Customer Management</h1>
+                <p class="page-subtitle">Register and manage insured policyholders</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Register Customer</button>
+        </div>
+        <div class="controls-bar">
+            <div class="search-group">
+                <input type="text" id="customer-search-input" class="search-input" placeholder="Search by name, email, or code..." onkeyup="filterCustomers()">
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table" id="customers-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>City / State</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    customers.forEach(c => {
+        html += `
+            <tr>
+                <td><strong>${c.customerCode}</strong></td>
+                <td>${c.firstName} ${c.lastName}</td>
+                <td>${c.email}</td>
+                <td>${c.phone}</td>
+                <td>${c.city || 'N/A'}, ${c.state || ''}</td>
+                <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+async function filterCustomers() {
+    const val = document.getElementById('customer-search-input').value;
+    const customers = await API.getCustomers(val);
+    const tbody = document.querySelector('#customers-table tbody');
+    tbody.innerHTML = customers.map(c => `
+        <tr>
+            <td><strong>${c.customerCode}</strong></td>
+            <td>${c.firstName} ${c.lastName}</td>
+            <td>${c.email}</td>
+            <td>${c.phone}</td>
+            <td>${c.city || 'N/A'}, ${c.state || ''}</td>
+            <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
+            <td><button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">Delete</button></td>
+        </tr>
+    `).join('');
+}
+
+/* 3. AGENTS VIEW */
+async function renderAgentsView(container) {
+    const agents = await API.getAgents();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Agent Directory</h1>
+                <p class="page-subtitle">Manage insurance brokers and underwriters</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddAgentModal()">+ Add Agent</button>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Agent Code</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Agency Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    agents.forEach(a => {
+        html += `
+            <tr>
+                <td><strong>${a.agentCode}</strong></td>
+                <td>${a.firstName} ${a.lastName}</td>
+                <td>${a.email}</td>
+                <td>${a.phone}</td>
+                <td>${a.agencyName || 'Independent'}</td>
+                <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="deleteAgent(${a.id})">Delete</button></td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 4. POLICIES VIEW */
+async function renderPoliciesView(container) {
+    const policies = await API.getPolicies();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Policy Lifecycle Management</h1>
+                <p class="page-subtitle">Create, monitor, and update active policy contracts</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCreatePolicyModal()">+ Issue Policy</button>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Policy #</th>
+                        <th>Customer</th>
+                        <th>Agent</th>
+                        <th>Category</th>
+                        <th>Coverage</th>
+                        <th>Premium</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    policies.forEach(p => {
+        html += `
+            <tr>
+                <td><strong>${p.policyNumber}</strong></td>
+                <td>${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'N/A'}</td>
+                <td>${p.agent ? p.agent.firstName + ' ' + p.agent.lastName : 'Direct'}</td>
+                <td>${p.policyType ? p.policyType.category : 'N/A'}</td>
+                <td>$${p.coverageAmount.toLocaleString()}</td>
+                <td>$${p.premiumAmount.toLocaleString()}</td>
+                <td>${p.expiryDate}</td>
+                <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openRenewModal(${p.id})">Renew</button>
+                    <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal(${p.id})">Pay</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 5. CLAIMS VIEW */
+async function renderClaimsView(container) {
+    const claims = await API.getClaims();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Claims & Assessment Management</h1>
+                <p class="page-subtitle">Process incoming claims, technical assessments, and settlements</p>
+            </div>
+            <button class="btn btn-primary" onclick="openSubmitClaimModal()">+ File New Claim</button>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Claim #</th>
+                        <th>Policy #</th>
+                        <th>Customer</th>
+                        <th>Amount Claimed</th>
+                        <th>Incident Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    claims.forEach(c => {
+        html += `
+            <tr>
+                <td><strong>${c.claimNumber}</strong></td>
+                <td>${c.policy ? c.policy.policyNumber : 'N/A'}</td>
+                <td>${c.customer ? c.customer.firstName + ' ' + c.customer.lastName : 'N/A'}</td>
+                <td>$${c.claimAmount.toLocaleString()}</td>
+                <td>${c.incidentDate}</td>
+                <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
+                <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openAssessModal(${c.id}, ${c.claimAmount})">Assess</button>
+                    <button class="btn btn-primary btn-sm" onclick="openSettleModal(${c.id}, ${c.claimAmount})">Settle</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 6. PAYMENTS VIEW */
+async function renderPaymentsView(container) {
+    const payments = await API.getPayments();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Premium Payment Ledger</h1>
+                <p class="page-subtitle">Track premium collection transactions and transaction references</p>
+            </div>
+            <button class="btn btn-primary" onclick="openRecordPaymentModal()">+ Record Payment</button>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Payment #</th>
+                        <th>Policy #</th>
+                        <th>Customer</th>
+                        <th>Amount Paid</th>
+                        <th>Method</th>
+                        <th>Txn Ref</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    payments.forEach(p => {
+        html += `
+            <tr>
+                <td><strong>${p.paymentNumber}</strong></td>
+                <td>${p.policy ? p.policy.policyNumber : 'N/A'}</td>
+                <td>${p.policy && p.policy.customer ? p.policy.customer.firstName + ' ' + p.policy.customer.lastName : 'N/A'}</td>
+                <td>$${p.amount.toLocaleString()}</td>
+                <td>${p.paymentMethod}</td>
+                <td><code>${p.transactionRef || 'N/A'}</code></td>
+                <td>${p.paymentDate ? p.paymentDate.split('T')[0] : 'N/A'}</td>
+                <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 7. RENEWALS VIEW */
+async function renderRenewalsView(container) {
+    const renewals = await API.getRenewals();
+    let html = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Policy Renewal History</h1>
+                <p class="page-subtitle">Log of automated and agent-processed contract term extensions</p>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Renewal #</th>
+                        <th>Policy #</th>
+                        <th>Previous Expiry</th>
+                        <th>New Expiry</th>
+                        <th>Renewal Premium</th>
+                        <th>Processed Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    renewals.forEach(r => {
+        html += `
+            <tr>
+                <td><strong>${r.renewalNumber}</strong></td>
+                <td>${r.policy ? r.policy.policyNumber : 'N/A'}</td>
+                <td>${r.previousExpiryDate}</td>
+                <td><strong style="color: var(--primary);">${r.newExpiryDate}</strong></td>
+                <td>$${r.renewalPremium.toLocaleString()}</td>
+                <td>${r.renewalDate}</td>
+                <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+/* 8. DSA VISUALIZER VIEW */
+function renderDSAView(container) {
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Computer Engineering DSA Demonstration</h1>
+                <p class="page-subtitle">Interactive algorithmic playground executing custom Data Structures & Algorithms</p>
+            </div>
+        </div>
+
+        <div class="dsa-panel">
+            <h3>Custom Algorithm Controls</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Select a custom DSA feature to trigger its algorithm benchmark and inspect execution results:</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <button class="btn btn-primary" onclick="DSAVisualizer.runHashMapTest()">1. Custom HashMap O(1) Search</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runSearchComparison()">2. Linear vs Binary Search Benchmark</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runQuickSortTest()">3. QuickSort Policies</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runPriorityQueueTest()">4. Priority Queue / Max Heap</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runBSTTest()">5. Policy Binary Search Tree (BST)</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runGraphTest('bfs')">6. Graph BFS Traversal</button>
+                <button class="btn btn-secondary" onclick="DSAVisualizer.runGraphTest('dfs')">7. Graph DFS Traversal</button>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <input type="text" id="dsa-hash-policy-input" class="search-input" value="POL-10001" placeholder="Enter Policy Number for HashMap/Search test...">
+                <select id="dsa-sort-by-select" class="select-input">
+                    <option value="premium">Sort QuickSort by Premium</option>
+                    <option value="coverage">Sort QuickSort by Coverage</option>
+                </select>
+            </div>
+
+            <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--primary);">Live Execution Console Output:</h4>
+            <div id="dsa-output-box" class="dsa-code-block">// Click any button above to run algorithm benchmarks...</div>
+        </div>
+    `;
+}
+
+/* 9. DBMS & PL/SQL VIEW */
+function renderDBMSView(container) {
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">DBMS Evaluation & SQL Documentation</h1>
+                <p class="page-subtitle">3NF Relational Schema, ER Model, 25+ SQL Queries, and MySQL Stored Procedures</p>
+            </div>
+        </div>
+
+        <div class="dsa-panel">
+            <h3>1. Relational Schema Normalization (3NF Verified)</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                The InsureFlow database is normalized to 3rd Normal Form. Entities: <strong>CUSTOMERS, AGENTS, POLICY_TYPES, POLICIES, PREMIUM_PAYMENTS, RENEWALS, CLAIMS, CLAIM_DOCUMENTS, CLAIM_ASSESSMENTS, CLAIM_SETTLEMENTS</strong>.
+            </p>
+
+            <h3 style="margin-top: 1.5rem;">2. PL/SQL / MySQL Database Programming Features</h3>
+            <ul style="padding-left: 1.5rem; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;">
+                <li><strong>Stored Procedure:</strong> <code>sp_process_claim_settlement(claim_id, amount, method, notes, OUT ref)</code> - Atomic settlement execution.</li>
+                <li><strong>Stored Function:</strong> <code>fn_calculate_total_customer_premium(cust_id)</code> - Returns cumulative paid premium.</li>
+                <li><strong>Trigger:</strong> <code>trg_update_policy_status_on_renewal</code> - Auto updates policy expiry date and activates status upon renewal insert.</li>
+                <li><strong>Cursor Procedure:</strong> <code>sp_generate_agent_statistics()</code> - Iterates over agents to compile performance statistics.</li>
+            </ul>
+
+            <h3 style="margin-top: 1.5rem;">3. 25+ SQL Queries File Location</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                The full SQL query script is saved at: <code>docs/SQL_QUERIES.sql</code> and <code>docs/DATABASE_PROGRAMMING.sql</code>.
+            </p>
+        </div>
+    `;
+}
+
+/* MODALS & ACTIONS */
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+function openAddCustomerModal() {
+    document.getElementById('modal-add-customer').classList.add('show');
+}
+
+async function submitAddCustomer(e) {
+    e.preventDefault();
+    const data = {
+        firstName: document.getElementById('cust-fname').value,
+        lastName: document.getElementById('cust-lname').value,
+        email: document.getElementById('cust-email').value,
+        phone: document.getElementById('cust-phone').value,
+        city: document.getElementById('cust-city').value,
+        state: document.getElementById('cust-state').value,
+        address: document.getElementById('cust-address').value
+    };
+
+    try {
+        await API.createCustomer(data);
+        closeModal('modal-add-customer');
+        showToast('Customer registered successfully!');
+        await loadActiveUserDropdowns();
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openAddAgentModal() {
+    document.getElementById('modal-add-agent').classList.add('show');
+}
+
+async function submitAddAgent(e) {
+    e.preventDefault();
+    const data = {
+        firstName: document.getElementById('agt-fname').value,
+        lastName: document.getElementById('agt-lname').value,
+        email: document.getElementById('agt-email').value,
+        phone: document.getElementById('agt-phone').value,
+        agencyName: document.getElementById('agt-agency').value
+    };
+
+    try {
+        await API.createAgent(data);
+        closeModal('modal-add-agent');
+        showToast('Agent added successfully!');
+        await loadActiveUserDropdowns();
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+async function openCreatePolicyModal() {
+    const custSelect = document.getElementById('pol-customer-select');
+    const typeSelect = document.getElementById('pol-type-select');
+    const agentSelect = document.getElementById('pol-agent-select');
+
+    custSelect.innerHTML = currentCustomers.map(c => `<option value="${c.id}">${c.firstName} ${c.lastName}</option>`).join('');
+    agentSelect.innerHTML = `<option value="">Direct (No Agent)</option>` + currentAgents.map(a => `<option value="${a.id}">${a.firstName} ${a.lastName}</option>`).join('');
+
+    const types = await API.getPolicyTypes();
+    typeSelect.innerHTML = types.map(t => `<option value="${t.id}">${t.name} ($${t.basePremium}/yr)</option>`).join('');
+
+    document.getElementById('modal-create-policy').classList.add('show');
+}
+
+async function submitCreatePolicy(e) {
+    e.preventDefault();
+    const data = {
+        customerId: parseInt(document.getElementById('pol-customer-select').value),
+        policyTypeId: parseInt(document.getElementById('pol-type-select').value),
+        agentId: document.getElementById('pol-agent-select').value ? parseInt(document.getElementById('pol-agent-select').value) : null,
+        coverageAmount: parseFloat(document.getElementById('pol-coverage').value),
+        premiumAmount: parseFloat(document.getElementById('pol-premium').value)
+    };
+
+    try {
+        await API.createPolicy(data);
+        closeModal('modal-create-policy');
+        showToast('Policy issued successfully!');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openRecordPaymentModal(policyId = null) {
+    const select = document.getElementById('pay-policy-select');
+    select.value = policyId || '';
+    document.getElementById('modal-record-payment').classList.add('show');
+}
+
+async function submitRecordPayment(e) {
+    e.preventDefault();
+    const data = {
+        policyId: parseInt(document.getElementById('pay-policy-select').value),
+        amount: parseFloat(document.getElementById('pay-amount').value),
+        paymentMethod: document.getElementById('pay-method').value
+    };
+
+    try {
+        await API.recordPayment(data);
+        closeModal('modal-record-payment');
+        showToast('Premium payment recorded! Policy activated.');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openSubmitClaimModal(policyId = null) {
+    const custId = getSelectedCustomerId();
+    document.getElementById('claim-customer-id').value = custId;
+    document.getElementById('modal-submit-claim').classList.add('show');
+}
+
+async function submitClaimForm(e) {
+    e.preventDefault();
+    const data = {
+        policyId: parseInt(document.getElementById('claim-policy-id').value),
+        customerId: parseInt(document.getElementById('claim-customer-id').value),
+        claimAmount: parseFloat(document.getElementById('claim-amount').value),
+        incidentDate: document.getElementById('claim-date').value,
+        incidentDescription: document.getElementById('claim-desc').value,
+        priority: document.getElementById('claim-priority').value
+    };
+
+    try {
+        await API.submitClaim(data);
+        closeModal('modal-submit-claim');
+        showToast('Insurance claim submitted successfully!');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openAssessModal(claimId, amount) {
+    document.getElementById('assess-claim-id').value = claimId;
+    document.getElementById('assess-amount').value = amount;
+    document.getElementById('modal-assess-claim').classList.add('show');
+}
+
+async function submitAssessmentForm(e) {
+    e.preventDefault();
+    const data = {
+        claimId: parseInt(document.getElementById('assess-claim-id').value),
+        assessedAmount: parseFloat(document.getElementById('assess-amount').value),
+        recommendation: document.getElementById('assess-recommendation').value,
+        assessmentNotes: document.getElementById('assess-notes').value
+    };
+
+    try {
+        await API.assessClaim(data);
+        closeModal('modal-assess-claim');
+        showToast('Claim assessment updated!');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openSettleModal(claimId, amount) {
+    document.getElementById('settle-claim-id').value = claimId;
+    document.getElementById('settle-amount').value = amount;
+    document.getElementById('modal-settle-claim').classList.add('show');
+}
+
+async function submitSettlementForm(e) {
+    e.preventDefault();
+    const data = {
+        claimId: parseInt(document.getElementById('settle-claim-id').value),
+        approvedAmount: parseFloat(document.getElementById('settle-amount').value),
+        paymentMethod: document.getElementById('settle-method').value,
+        notes: document.getElementById('settle-notes').value
+    };
+
+    try {
+        await API.settleClaim(data);
+        closeModal('modal-settle-claim');
+        showToast('Claim settled and funds disbursed!');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+function openRenewModal(policyId) {
+    document.getElementById('renew-policy-id').value = policyId;
+    document.getElementById('modal-renew-policy').classList.add('show');
+}
+
+async function submitRenewalForm(e) {
+    e.preventDefault();
+    const data = {
+        policyId: parseInt(document.getElementById('renew-policy-id').value),
+        termMonths: parseInt(document.getElementById('renew-term').value)
+    };
+
+    try {
+        await API.processRenewal(data);
+        closeModal('modal-renew-policy');
+        showToast('Policy renewed successfully!');
+        renderActiveTab();
+    } catch (err) {
+        showToast(err.message, true);
+    }
+}
+
+async function deleteCustomer(id) {
+    if (confirm('Are you sure you want to delete this customer?')) {
+        try {
+            await API.deleteCustomer(id);
+            showToast('Customer deleted');
+            renderActiveTab();
+        } catch (err) {
+            showToast(err.message, true);
+        }
+    }
+}
+
+async function deleteAgent(id) {
+    if (confirm('Are you sure you want to delete this agent?')) {
+        try {
+            await API.deleteAgent(id);
+            showToast('Agent deleted');
+            renderActiveTab();
+        } catch (err) {
+            showToast(err.message, true);
+        }
+    }
+}
+
+function showToast(msg, isError = false) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${isError ? 'error' : ''}`;
+    toast.innerText = (isError ? '⚠️ ' : '✅ ') + msg;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}

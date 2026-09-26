@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsureFlow - Insurance Policy & Claims Management System</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <a href="#" class="brand">
+            <div class="brand-icon">🛡️</div>
+            <span>InsureFlow</span>
+        </a>
+        <ul class="nav-links">
+            <li class="nav-item"><button class="active" data-tab="dashboard">Dashboard</button></li>
+            <li class="nav-item"><button data-tab="customers">Customers</button></li>
+            <li class="nav-item"><button data-tab="agents">Agents</button></li>
+            <li class="nav-item"><button data-tab="policies">Policies</button></li>
+            <li class="nav-item"><button data-tab="claims">Claims</button></li>
+            <li class="nav-item"><button data-tab="payments">Payments</button></li>
+            <li class="nav-item"><button data-tab="renewals">Renewals</button></li>
+            <li class="nav-item"><button data-tab="dsa" style="color: #34d399;">⚡ DSA Visualizer</button></li>
+            <li class="nav-item"><button data-tab="dbms">🗄️ DBMS Info</button></li>
+        </ul>
+    </header>
+
+    <!-- Role Switcher Panel -->
+    <div class="role-bar">
+        <div class="role-switcher">
+            <span style="color: var(--text-muted); font-weight: 600;">Active Role:</span>
+            <div class="role-pill active" data-role="ADMIN">Admin</div>
+            <div class="role-pill" data-role="CUSTOMER">Customer</div>
+            <div class="role-pill" data-role="AGENT">Agent</div>
+        </div>
+        <div class="user-selector">
+            <span style="color: var(--text-muted); margin-right: 0.5rem;">Select Simulated Profile:</span>
+            <select id="active-customer-select" class="select-input" onchange="renderActiveTab()"></select>
+            <select id="active-agent-select" class="select-input" style="margin-left: 0.5rem;" onchange="renderActiveTab()"></select>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="container" id="app-content">
+        <!-- Dynamic Views Rendered Here -->
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- MODALS -->
+
+    <!-- Modal 1: Add Customer -->
+    <div class="modal-backdrop" id="modal-add-customer">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Register New Customer</h3>
+                <button class="close-btn" onclick="closeModal('modal-add-customer')">&times;</button>
+            </div>
+            <form onsubmit="submitAddCustomer(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="cust-fname" class="form-control" required placeholder="e.g., Aarav">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="cust-lname" class="form-control" required placeholder="e.g., Sharma">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="cust-email" class="form-control" required placeholder="e.g., aarav@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="text" id="cust-phone" class="form-control" required placeholder="e.g., +91-9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" id="cust-city" class="form-control" placeholder="e.g., Mumbai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <input type="text" id="cust-state" class="form-control" placeholder="e.g., Maharashtra">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Residential Address</label>
+                        <input type="text" id="cust-address" class="form-control" placeholder="Street name, building details...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-customer')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add Agent -->
+    <div class="modal-backdrop" id="modal-add-agent">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Register Insurance Agent</h3>
+                <button class="close-btn" onclick="closeModal('modal-add-agent')">&times;</button>
+            </div>
+            <form onsubmit="submitAddAgent(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="agt-fname" class="form-control" required placeholder="e.g., Vikram">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="agt-lname" class="form-control" required placeholder="e.g., Mehta">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="agt-email" class="form-control" required placeholder="e.g., vikram@insureflow.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="text" id="agt-phone" class="form-control" required placeholder="e.g., +91-9811122233">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Agency Name</label>
+                        <input type="text" id="agt-agency" class="form-control" placeholder="e.g., Apex Financial Advisory">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-agent')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Issue Policy -->
+    <div class="modal-backdrop" id="modal-create-policy">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Issue Insurance Policy</h3>
+                <button class="close-btn" onclick="closeModal('modal-create-policy')">&times;</button>
+            </div>
+            <form onsubmit="submitCreatePolicy(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Select Customer *</label>
+                        <select id="pol-customer-select" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select Policy Plan *</label>
+                        <select id="pol-type-select" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assigned Agent</label>
+                        <select id="pol-agent-select" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Coverage Amount ($) *</label>
+                        <input type="number" id="pol-coverage" class="form-control" required value="500000">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Annual Premium Amount ($) *</label>
+                        <input type="number" id="pol-premium" class="form-control" required value="1200">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create-policy')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Policy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Record Premium Payment -->
+    <div class="modal-backdrop" id="modal-record-payment">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Record Premium Payment</h3>
+                <button class="close-btn" onclick="closeModal('modal-record-payment')">&times;</button>
+            </div>
+            <form onsubmit="submitRecordPayment(event)">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Policy ID *</label>
+                        <input type="number" id="pay-policy-select" class="form-control" required placeholder="Enter Policy ID (e.g., 1)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Amount ($) *</label>
+                        <input type="number" id="pay-amount" class="form-control" required value="1200">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method *</label>
+                        <select id="pay-method" class="form-control">
+                            <option value="CREDIT_CARD">Credit Card</option>
+                            <option value="UPI">UPI / Google Pay</option>
+                            <option value="BANK_TRANSFER">Net Banking</option>
+                            <option value="CHEQUE">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-record-payment')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Submit Claim -->
+    <div class="modal-backdrop" id="modal-submit-claim">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">File Insurance Claim</h3>
+                <button class="close-btn" onclick="closeModal('modal-submit-claim')">&times;</button>
+            </div>
+            <form onsubmit="submitClaimForm(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Policy ID *</label>
+                        <input type="number" id="claim-policy-id" class="form-control" required value="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Customer ID *</label>
+                        <input type="number" id="claim-customer-id" class="form-control" required value="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Claimed Amount ($) *</label>
+                        <input type="number" id="claim-amount" class="form-control" required value="25000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Incident Date *</label>
+                        <input type="date" id="claim-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Claim Priority</label>
+                        <select id="claim-priority" class="form-control">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Incident Description *</label>
+                        <textarea id="claim-desc" class="form-control" rows="3" required placeholder="Describe what happened..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-submit-claim')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 6: Assess Claim -->
+    <div class="modal-backdrop" id="modal-assess-claim">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Assess Claim Recommendation</h3>
+                <button class="close-btn" onclick="closeModal('modal-assess-claim')">&times;</button>
+            </div>
+            <form onsubmit="submitAssessmentForm(event)">
+                <input type="hidden" id="assess-claim-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Assessed Approved Amount ($)</label>
+                        <input type="number" id="assess-amount" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Recommendation *</label>
+                        <select id="assess-recommendation" class="form-control">
+                            <option value="APPROVE">Approve Claim</option>
+                            <option value="REJECT">Reject Claim</option>
+                            <option value="REQUEST_INFO">Request Information</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Assessment Officer Notes</label>
+                        <textarea id="assess-notes" class="form-control" rows="3" placeholder="Technical verification remarks..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-assess-claim')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Assessment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 7: Settle Claim -->
+    <div class="modal-backdrop" id="modal-settle-claim">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Disburse Claim Settlement</h3>
+                <button class="close-btn" onclick="closeModal('modal-settle-claim')">&times;</button>
+            </div>
+            <form onsubmit="submitSettlementForm(event)">
+                <input type="hidden" id="settle-claim-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Settlement Amount ($) *</label>
+                        <input type="number" id="settle-amount" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method *</label>
+                        <select id="settle-method" class="form-control">
+                            <option value="BANK_TRANSFER">Bank NEFT/RTGS</option>
+                            <option value="CHEQUE">Cheque</option>
+                            <option value="DIRECT_DEPOSIT">Direct Deposit</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Settlement Remarks</label>
+                        <input type="text" id="settle-notes" class="form-control" placeholder="Final disbursement reference note...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-settle-claim')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Finalize Settlement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 8: Renew Policy -->
+    <div class="modal-backdrop" id="modal-renew-policy">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Renew Policy Contract</h3>
+                <button class="close-btn" onclick="closeModal('modal-renew-policy')">&times;</button>
+            </div>
+            <form onsubmit="submitRenewalForm(event)">
+                <input type="hidden" id="renew-policy-id">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Renewal Term (Months) *</label>
+                        <select id="renew-term" class="form-control">
+                            <option value="12">12 Months (1 Year)</option>
+                            <option value="24">24 Months (2 Years)</option>
+                            <option value="36">36 Months (3 Years)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-renew-policy')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Renewal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>InsureFlow &copy; 2026 - Insurance Policy & Claims Management System | Computer Engineering Project (Java + DSA + DBMS)</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/dsa-visualizer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
