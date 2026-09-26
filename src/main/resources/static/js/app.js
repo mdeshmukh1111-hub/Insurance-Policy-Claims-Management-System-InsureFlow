@@ -38,13 +38,13 @@ function updateNavForRole() {
     navButtons.forEach(btn => {
         const tab = btn.dataset.tab;
         if (currentRole === 'CUSTOMER') {
-            if (['customers', 'agents', 'policy-types', 'dbms'].includes(tab)) {
+            if (['customers', 'agents', 'policy-types'].includes(tab)) {
                 btn.parentElement.style.display = 'none';
             } else {
                 btn.parentElement.style.display = 'inline-block';
             }
         } else if (currentRole === 'AGENT') {
-            if (['agents', 'policy-types', 'dbms'].includes(tab)) {
+            if (['agents', 'policy-types'].includes(tab)) {
                 btn.parentElement.style.display = 'none';
             } else {
                 btn.parentElement.style.display = 'inline-block';
@@ -54,7 +54,7 @@ function updateNavForRole() {
         }
     });
 
-    if (currentRole === 'CUSTOMER' && ['customers', 'agents', 'policy-types', 'dbms'].includes(activeTab)) {
+    if (currentRole === 'CUSTOMER' && ['customers', 'agents', 'policy-types'].includes(activeTab)) {
         activeTab = 'dashboard';
     }
 }
@@ -126,12 +126,6 @@ async function renderActiveTab() {
                 break;
             case 'renewals':
                 await renderRenewalsView(content);
-                break;
-            case 'dsa':
-                renderDSAView(content);
-                break;
-            case 'dbms':
-                renderDBMSView(content);
                 break;
             default:
                 await renderDashboardView(content);
@@ -584,76 +578,6 @@ async function renderRenewalsView(container) {
     container.innerHTML = html;
 }
 
-/* 8. DSA VISUALIZER VIEW */
-function renderDSAView(container) {
-    container.innerHTML = `
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Computer Engineering DSA Demonstration</h1>
-                <p class="page-subtitle">Interactive algorithmic playground executing custom Data Structures & Algorithms</p>
-            </div>
-        </div>
-
-        <div class="dsa-panel">
-            <h3>Custom Algorithm Controls</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Select a custom DSA feature to trigger its algorithm benchmark and inspect execution results:</p>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
-                <button class="btn btn-primary" onclick="DSAVisualizer.runHashMapTest()">1. Custom HashMap O(1) Search</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runSearchComparison()">2. Linear vs Binary Search Benchmark</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runQuickSortTest()">3. QuickSort Policies</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runPriorityQueueTest()">4. Priority Queue / Max Heap</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runBSTTest()">5. Policy Binary Search Tree (BST)</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runGraphTest('bfs')">6. Graph BFS Traversal</button>
-                <button class="btn btn-secondary" onclick="DSAVisualizer.runGraphTest('dfs')">7. Graph DFS Traversal</button>
-            </div>
-
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                <input type="text" id="dsa-hash-policy-input" class="search-input" value="POL-10001" placeholder="Enter Policy Number for HashMap/Search test...">
-                <select id="dsa-sort-by-select" class="select-input">
-                    <option value="premium">Sort QuickSort by Premium</option>
-                    <option value="coverage">Sort QuickSort by Coverage</option>
-                </select>
-            </div>
-
-            <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--primary);">Live Execution Console Output:</h4>
-            <div id="dsa-output-box" class="dsa-code-block">// Click any button above to run algorithm benchmarks...</div>
-        </div>
-    `;
-}
-
-/* 9. DBMS & PL/SQL VIEW */
-function renderDBMSView(container) {
-    container.innerHTML = `
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">DBMS Evaluation & SQL Documentation</h1>
-                <p class="page-subtitle">3NF Relational Schema, ER Model, 25+ SQL Queries, and MySQL Stored Procedures</p>
-            </div>
-        </div>
-
-        <div class="dsa-panel">
-            <h3>1. Relational Schema Normalization (3NF Verified)</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
-                The InsureFlow database is normalized to 3rd Normal Form. Entities: <strong>CUSTOMERS, AGENTS, POLICY_TYPES, POLICIES, PREMIUM_PAYMENTS, RENEWALS, CLAIMS, CLAIM_DOCUMENTS, CLAIM_ASSESSMENTS, CLAIM_SETTLEMENTS</strong>.
-            </p>
-
-            <h3 style="margin-top: 1.5rem;">2. PL/SQL / MySQL Database Programming Features</h3>
-            <ul style="padding-left: 1.5rem; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;">
-                <li><strong>Stored Procedure:</strong> <code>sp_process_claim_settlement(claim_id, amount, method, notes, OUT ref)</code> - Atomic settlement execution.</li>
-                <li><strong>Stored Function:</strong> <code>fn_calculate_total_customer_premium(cust_id)</code> - Returns cumulative paid premium.</li>
-                <li><strong>Trigger:</strong> <code>trg_update_policy_status_on_renewal</code> - Auto updates policy expiry date and activates status upon renewal insert.</li>
-                <li><strong>Cursor Procedure:</strong> <code>sp_generate_agent_statistics()</code> - Iterates over agents to compile performance statistics.</li>
-            </ul>
-
-            <h3 style="margin-top: 1.5rem;">3. 25+ SQL Queries File Location</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">
-                The full SQL query script is saved at: <code>docs/SQL_QUERIES.sql</code> and <code>docs/DATABASE_PROGRAMMING.sql</code>.
-            </p>
-        </div>
-    `;
-}
-
 /* MODALS & ACTIONS */
 function closeModal(id) {
     document.getElementById(id).classList.remove('show');
@@ -896,7 +820,7 @@ function showToast(msg, isError = false) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${isError ? 'error' : ''}`;
-    toast.innerText = (isError ? '⚠️ ' : '✅ ') + msg;
+    toast.innerText = (isError ? 'Error: ' : 'Success: ') + msg;
     container.appendChild(toast);
 
     setTimeout(() => {
