@@ -64,7 +64,7 @@ public class ClaimServiceImpl implements ClaimService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + dto.getCustomerId()));
 
         if (dto.getClaimAmount() > policy.getCoverageAmount()) {
-            throw new BadRequestException("Claim amount ($" + dto.getClaimAmount() + ") cannot exceed policy coverage amount ($" + policy.getCoverageAmount() + ")!");
+            throw new BadRequestException("Claim amount (₹" + dto.getClaimAmount() + ") cannot exceed policy coverage amount (₹" + policy.getCoverageAmount() + ")!");
         }
 
         String claimNumber = "CLM-" + (1000 + new Random().nextInt(9000));

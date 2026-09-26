@@ -179,11 +179,11 @@ async function renderDashboardView(container) {
             </div>
             <div class="stat-card purple">
                 <div class="stat-label">Premium Collected</div>
-                <div class="stat-value">$${(stats.totalPremiumCollected || 0).toLocaleString()}</div>
+                <div class="stat-value">₹${(stats.totalPremiumCollected || 0).toLocaleString()}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Settlement Disbursed</div>
-                <div class="stat-value">$${(stats.totalClaimSettlementAmount || 0).toLocaleString()}</div>
+                <div class="stat-value">₹${(stats.totalClaimSettlementAmount || 0).toLocaleString()}</div>
             </div>
         `;
     } else if (currentRole === 'CUSTOMER') {
@@ -198,7 +198,7 @@ async function renderDashboardView(container) {
             </div>
             <div class="stat-card amber">
                 <div class="stat-label">Premium Due</div>
-                <div class="stat-value">$${(stats.premiumDue || 0).toLocaleString()}</div>
+                <div class="stat-value">₹${(stats.premiumDue || 0).toLocaleString()}</div>
             </div>
             <div class="stat-card rose">
                 <div class="stat-label">Active Claims</div>
@@ -255,8 +255,8 @@ async function renderDashboardView(container) {
                 <td><strong>${p.policyNumber}</strong></td>
                 <td>${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'N/A'}</td>
                 <td>${p.policyType ? p.policyType.name : 'N/A'}</td>
-                <td>$${p.coverageAmount.toLocaleString()}</td>
-                <td>$${p.premiumAmount.toLocaleString()}</td>
+                <td>₹${p.coverageAmount.toLocaleString()}</td>
+                <td>₹${p.premiumAmount.toLocaleString()}</td>
                 <td>${p.expiryDate}</td>
                 <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
                 <td>
@@ -421,8 +421,8 @@ async function renderPoliciesView(container) {
                 <td>${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'N/A'}</td>
                 <td>${p.agent ? p.agent.firstName + ' ' + p.agent.lastName : 'Direct'}</td>
                 <td>${p.policyType ? p.policyType.category : 'N/A'}</td>
-                <td>$${p.coverageAmount.toLocaleString()}</td>
-                <td>$${p.premiumAmount.toLocaleString()}</td>
+                <td>₹${p.coverageAmount.toLocaleString()}</td>
+                <td>₹${p.premiumAmount.toLocaleString()}</td>
                 <td>${p.expiryDate}</td>
                 <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
                 <td>
@@ -471,7 +471,7 @@ async function renderClaimsView(container) {
                 <td><strong>${c.claimNumber}</strong></td>
                 <td>${c.policy ? c.policy.policyNumber : 'N/A'}</td>
                 <td>${c.customer ? c.customer.firstName + ' ' + c.customer.lastName : 'N/A'}</td>
-                <td>$${c.claimAmount.toLocaleString()}</td>
+                <td>₹${c.claimAmount.toLocaleString()}</td>
                 <td>${c.incidentDate}</td>
                 <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
                 <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
@@ -521,7 +521,7 @@ async function renderPaymentsView(container) {
                 <td><strong>${p.paymentNumber}</strong></td>
                 <td>${p.policy ? p.policy.policyNumber : 'N/A'}</td>
                 <td>${p.policy && p.policy.customer ? p.policy.customer.firstName + ' ' + p.policy.customer.lastName : 'N/A'}</td>
-                <td>$${p.amount.toLocaleString()}</td>
+                <td>₹${p.amount.toLocaleString()}</td>
                 <td>${p.paymentMethod}</td>
                 <td><code>${p.transactionRef || 'N/A'}</code></td>
                 <td>${p.paymentDate ? p.paymentDate.split('T')[0] : 'N/A'}</td>
@@ -567,7 +567,7 @@ async function renderRenewalsView(container) {
                 <td>${r.policy ? r.policy.policyNumber : 'N/A'}</td>
                 <td>${r.previousExpiryDate}</td>
                 <td><strong style="color: var(--primary);">${r.newExpiryDate}</strong></td>
-                <td>$${r.renewalPremium.toLocaleString()}</td>
+                <td>₹${r.renewalPremium.toLocaleString()}</td>
                 <td>${r.renewalDate}</td>
                 <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
             </tr>
@@ -644,7 +644,7 @@ async function openCreatePolicyModal() {
     agentSelect.innerHTML = `<option value="">Direct (No Agent)</option>` + currentAgents.map(a => `<option value="${a.id}">${a.firstName} ${a.lastName}</option>`).join('');
 
     const types = await API.getPolicyTypes();
-    typeSelect.innerHTML = types.map(t => `<option value="${t.id}">${t.name} ($${t.basePremium}/yr)</option>`).join('');
+    typeSelect.innerHTML = types.map(t => `<option value="${t.id}">${t.name} (₹${t.basePremium}/yr)</option>`).join('');
 
     document.getElementById('modal-create-policy').classList.add('show');
 }

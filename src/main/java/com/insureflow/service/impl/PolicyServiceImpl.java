@@ -67,7 +67,7 @@ public class PolicyServiceImpl implements PolicyService {
         }
 
         if (dto.getCoverageAmount() < policyType.getMinCoverage() || dto.getCoverageAmount() > policyType.getMaxCoverage()) {
-            throw new BadRequestException("Coverage amount must be between $" + policyType.getMinCoverage() + " and $" + policyType.getMaxCoverage());
+            throw new BadRequestException("Coverage amount must be between ₹" + policyType.getMinCoverage() + " and ₹" + policyType.getMaxCoverage());
         }
 
         String policyNumber = "POL-" + (10000 + new Random().nextInt(90000));

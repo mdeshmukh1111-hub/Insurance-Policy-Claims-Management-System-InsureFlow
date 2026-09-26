@@ -225,7 +225,7 @@ public class DsaServiceImpl implements DsaService {
             String polId = "POL-" + c.getPolicy().getId();
             String clmId = "CLM-" + c.getId();
 
-            graph.addNode(clmId, c.getClaimNumber() + " ($" + c.getClaimAmount() + ")", "CLAIM");
+            graph.addNode(clmId, c.getClaimNumber() + " (₹" + c.getClaimAmount() + ")", "CLAIM");
             graph.addEdge(polId, clmId);
         }
 

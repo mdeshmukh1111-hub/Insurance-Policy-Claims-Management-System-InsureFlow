@@ -15,7 +15,7 @@ FROM customers
 WHERE status = 'ACTIVE' 
 ORDER BY last_name ASC, first_name ASC;
 
--- Query 2: Find all active insurance policies with coverage greater than $500,000
+-- Query 2: Find all active insurance policies with coverage greater than ₹500,000
 SELECT policy_number, coverage_amount, premium_amount, start_date, expiry_date 
 FROM policies 
 WHERE status = 'ACTIVE' AND coverage_amount > 500000 

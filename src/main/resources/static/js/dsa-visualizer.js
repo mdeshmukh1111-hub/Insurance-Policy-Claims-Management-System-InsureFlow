@@ -41,7 +41,7 @@ const DSAVisualizer = {
                        `[SORT EXECUTION TIME]: ${res.executionTimeNanos} Nanoseconds\n` +
                        `[TOTAL ELEMENTS SORTED]: ${res.totalSorted}\n\n` +
                        `[SORTED RESULT LIST]:\n` +
-                       res.sortedList.map((p, i) => `${i + 1}. ${p.policyNumber} - ${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'Customer'} | Premium: $${p.premiumAmount} | Coverage: $${p.coverageAmount}`).join('\n');
+                       res.sortedList.map((p, i) => `${i + 1}. ${p.policyNumber} - ${p.customer ? p.customer.firstName + ' ' + p.customer.lastName : 'Customer'} | Premium: ₹${p.premiumAmount} | Coverage: ₹${p.coverageAmount}`).join('\n');
 
         document.getElementById('dsa-output-box').innerText = output;
     },
@@ -52,7 +52,7 @@ const DSAVisualizer = {
         const output = `[DSA CONCEPT]: ${res.dsaConcept} (${res.timeComplexity})\n` +
                        `[TOTAL CLAIMS IN MAX HEAP]: ${res.totalClaimsInHeap}\n\n` +
                        `[CLAIM PROCESSING PRIORITY ORDER (Urgent > High > Medium > Low)]:\n` +
-                       res.prioritizedList.map((c, i) => `${i + 1}. [${c.priority}] Claim #${c.claimNumber} - Customer: ${c.customer.firstName} ${c.customer.lastName} | Claim Amount: $${c.claimAmount} | Status: ${c.status}`).join('\n');
+                       res.prioritizedList.map((c, i) => `${i + 1}. [${c.priority}] Claim #${c.claimNumber} - Customer: ${c.customer.firstName} ${c.customer.lastName} | Claim Amount: ₹${c.claimAmount} | Status: ${c.status}`).join('\n');
 
         document.getElementById('dsa-output-box').innerText = output;
     },
