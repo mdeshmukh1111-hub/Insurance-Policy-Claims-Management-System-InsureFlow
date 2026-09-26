@@ -11,20 +11,20 @@ It provides an end-to-end digital lifecycle for policy issuance, premium payment
 
 ---
 
-## 🌟 Key Features & Highlights
+## Key Features & Highlights
 
-- ⚡ **Single-Port Integrated Deployment**: Spring Boot serves both backend REST APIs and the rich modern frontend from a single port (`http://localhost:8080/`).
-- 🎨 **Modern Non-Blue Aesthetic**: Styled with a tailored Emerald Green & Charcoal glassmorphism palette (`#059669`, `#10b981`, `#0f172a`).
-- 👥 **Multi-Role Access Control (RBAC)**: Switch seamlessly between Admin, Customer, and Agent interactive views.
-- 🔄 **Complete Insurance Workflow**:
+- **Single-Port Integrated Deployment**: Spring Boot serves both backend REST APIs and the rich modern frontend from a single port (`http://localhost:8080/`).
+- **Modern Non-Blue Aesthetic**: Styled with a tailored Emerald Green & Charcoal glassmorphism palette (`#059669`, `#10b981`, `#0f172a`).
+- **Multi-Role Access Control (RBAC)**: Switch seamlessly between Admin, Customer, and Agent interactive views.
+- **Complete Insurance Workflow**:
   `Select Policy Type → Create Policy → Pay Premium → Policy Active → Renewal Due → Renew Contract → File Claim → Under Review → Assess Claim → Approve / Reject → Disburse Settlement`
-- 📊 **Real-time Analytics Dashboards**: Live KPI metrics cards, recent transaction ledgers, interactive modal forms, and status badges.
-- 🧠 **Interactive DSA Visualizer & Playground**: Live benchmarking console to demonstrate custom Java DSA implementations.
-- 🗄️ **DBMS Evaluation Module**: 3NF verified schema, ER model, 25+ SQL queries, and MySQL Stored Procedures, Functions, Triggers, and Cursors.
+- **Real-time Analytics Dashboards**: Live KPI metrics cards, recent transaction ledgers, interactive modal forms, and status badges.
+- **Interactive DSA Visualizer & Playground**: Live benchmarking console to demonstrate custom Java DSA implementations.
+- **DBMS Evaluation Module**: 3NF verified schema, ER model, 25+ SQL queries, and MySQL Stored Procedures, Functions, Triggers, and Cursors.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 | :--- | :--- |
@@ -36,7 +36,7 @@ It provides an end-to-end digital lifecycle for policy issuance, premium payment
 
 ---
 
-## 📐 Architecture & Layered Design
+## Architecture & Layered Design
 
 ```
 src/main/java/com/insureflow/
@@ -53,7 +53,7 @@ src/main/java/com/insureflow/
 
 ---
 
-## 🗄️ Database Schema & Normalization (3NF)
+## Database Schema & Normalization (3NF)
 
 The database consists of **10 normalized relational tables**:
 
@@ -80,7 +80,7 @@ The database consists of **10 normalized relational tables**:
 
 ---
 
-## ⚡ DSA Implementations & Complexity
+## DSA Implementations & Complexity
 
 Located in `com.insureflow.dsa` and demonstrable via the **DSA Visualizer Tab**:
 
@@ -95,7 +95,7 @@ Located in `com.insureflow.dsa` and demonstrable via the **DSA Visualizer Tab**:
 
 ---
 
-## 🌐 REST API Endpoints
+## REST API Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
@@ -117,7 +117,7 @@ Located in `com.insureflow.dsa` and demonstrable via the **DSA Visualizer Tab**:
 
 ---
 
-## 🚀 How to Run the Application Locally
+## How to Run the Application Locally
 
 ### 1. Prerequisites
 - **Java JDK 17** or higher (Java 26 supported)
@@ -147,18 +147,18 @@ mvn spring-boot:run
 
 ### 4. Access the Application
 Open your web browser and navigate to:
-👉 **[http://localhost:8080/](http://localhost:8080/)**
+**[http://localhost:8080/](http://localhost:8080/)**
 
 The application automatically seeds realistic sample data on first boot!
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 *(Dashboard, Customer Management, Policy Issue, Claims Assessment, and DSA Visualizer views)*
 
 ---
 
-## 📄 License & Credits
+## License & Credits
 Developed for **Computer Engineering (Java + DSA + DBMS) College Evaluation**.  
 Author: [mdeshmukh1111-hub](https://github.com/mdeshmukh1111-hub)
