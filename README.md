@@ -114,6 +114,7 @@ Located in `com.insureflow.dsa` and demonstrable via the **DSA Visualizer Tab**:
 | `POST` | `/api/claim-settlements` | Disburse claim settlement |
 | `GET` | `/api/dashboard/admin` | Fetch Admin KPI metrics |
 | `GET` | `/api/dsa/{concept}` | Run live DSA benchmark test |
+| `POST` | `/api/chat` | Send query to InsureBot AI Assistant |
 
 ---
 

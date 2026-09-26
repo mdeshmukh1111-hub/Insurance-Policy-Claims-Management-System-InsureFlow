@@ -149,11 +149,11 @@ async function renderDashboardView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">${currentRole} Dashboard</h1>
-                <p class="page-subtitle">Real-time overview of key metrics, policy statuses, and claims workflow</p>
+                <h1 class="page-title">${t('dash_title', 'Dashboard Overview')} (${t('role_' + currentRole.toLowerCase(), currentRole)})</h1>
+                <p class="page-subtitle">${t('dash_subtitle', 'Real-time overview of key metrics, policy statuses, and claims workflow')}</p>
             </div>
             <div>
-                <button class="btn btn-primary" onclick="openCreatePolicyModal()">+ New Policy</button>
+                <button class="btn btn-primary" onclick="openCreatePolicyModal()">${t('btn_issue_policy', '+ Issue Policy')}</button>
             </div>
         </div>
         <div class="stats-grid">
@@ -162,65 +162,65 @@ async function renderDashboardView(container) {
     if (currentRole === 'ADMIN') {
         html += `
             <div class="stat-card">
-                <div class="stat-label">Total Customers</div>
+                <div class="stat-label">${t('kpi_total_cust', 'Total Customers')}</div>
                 <div class="stat-value">${stats.totalCustomers || 0}</div>
             </div>
             <div class="stat-card teal">
-                <div class="stat-label">Active Agents</div>
+                <div class="stat-label">${t('kpi_active_agt', 'Active Agents')}</div>
                 <div class="stat-value">${stats.totalAgents || 0}</div>
             </div>
             <div class="stat-card amber">
-                <div class="stat-label">Active Policies</div>
+                <div class="stat-label">${t('kpi_active_pol', 'Active Policies')}</div>
                 <div class="stat-value">${stats.activePolicies || 0}</div>
             </div>
             <div class="stat-card rose">
-                <div class="stat-label">Pending Claims</div>
+                <div class="stat-label">${t('kpi_pending_clm', 'Pending Claims')}</div>
                 <div class="stat-value">${stats.pendingClaims || 0}</div>
             </div>
             <div class="stat-card purple">
-                <div class="stat-label">Premium Collected</div>
+                <div class="stat-label">${t('kpi_prem_coll', 'Premium Collected')}</div>
                 <div class="stat-value">₹${(stats.totalPremiumCollected || 0).toLocaleString()}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Settlement Disbursed</div>
+                <div class="stat-label">${t('kpi_settle_disb', 'Settlement Disbursed')}</div>
                 <div class="stat-value">₹${(stats.totalClaimSettlementAmount || 0).toLocaleString()}</div>
             </div>
         `;
     } else if (currentRole === 'CUSTOMER') {
         html += `
             <div class="stat-card">
-                <div class="stat-label">My Total Policies</div>
+                <div class="stat-label">${t('kpi_active_pol', 'My Total Policies')}</div>
                 <div class="stat-value">${stats.totalPolicies || 0}</div>
             </div>
             <div class="stat-card teal">
-                <div class="stat-label">Active Coverage</div>
+                <div class="stat-label">${t('tbl_coverage', 'Active Coverage')}</div>
                 <div class="stat-value">${stats.activePolicies || 0}</div>
             </div>
             <div class="stat-card amber">
-                <div class="stat-label">Premium Due</div>
+                <div class="stat-label">${t('tbl_premium', 'Premium Due')}</div>
                 <div class="stat-value">₹${(stats.premiumDue || 0).toLocaleString()}</div>
             </div>
             <div class="stat-card rose">
-                <div class="stat-label">Active Claims</div>
+                <div class="stat-label">${t('kpi_pending_clm', 'Active Claims')}</div>
                 <div class="stat-value">${stats.pendingClaims || 0}</div>
             </div>
         `;
     } else {
         html += `
             <div class="stat-card">
-                <div class="stat-label">Assigned Customers</div>
+                <div class="stat-label">${t('kpi_total_cust', 'Assigned Customers')}</div>
                 <div class="stat-value">${stats.assignedCustomers || 0}</div>
             </div>
             <div class="stat-card teal">
-                <div class="stat-label">Active Policies</div>
+                <div class="stat-label">${t('kpi_active_pol', 'Active Policies')}</div>
                 <div class="stat-value">${stats.activePolicies || 0}</div>
             </div>
             <div class="stat-card amber">
-                <div class="stat-label">Pending Renewals</div>
+                <div class="stat-label">${t('nav_renewals', 'Pending Renewals')}</div>
                 <div class="stat-value">${stats.pendingRenewals || 0}</div>
             </div>
             <div class="stat-card rose">
-                <div class="stat-label">Claims Under Review</div>
+                <div class="stat-label">${t('kpi_pending_clm', 'Claims Under Review')}</div>
                 <div class="stat-value">${stats.pendingClaims || 0}</div>
             </div>
         `;
@@ -231,19 +231,19 @@ async function renderDashboardView(container) {
     // Add recent policies table
     const policies = await API.getPolicies();
     html += `
-        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Recent Insurance Policies</h2>
+        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">${t('nav_policies', 'Recent Insurance Policies')}</h2>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Policy #</th>
-                        <th>Customer</th>
-                        <th>Policy Type</th>
-                        <th>Coverage</th>
-                        <th>Premium</th>
-                        <th>Expiry Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('tbl_policy_num', 'Policy #')}</th>
+                        <th>${t('tbl_customer', 'Customer')}</th>
+                        <th>${t('tbl_type', 'Policy Type')}</th>
+                        <th>${t('tbl_coverage', 'Coverage')}</th>
+                        <th>${t('tbl_premium', 'Premium')}</th>
+                        <th>${t('tbl_expiry', 'Expiry Date')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
+                        <th>${t('tbl_actions', 'Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -260,8 +260,8 @@ async function renderDashboardView(container) {
                 <td>${p.expiryDate}</td>
                 <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="openRecordPaymentModal(${p.id})">Pay Premium</button>
-                    <button class="btn btn-primary btn-sm" onclick="openSubmitClaimModal(${p.id})">Submit Claim</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openRecordPaymentModal(${p.id})">${t('btn_pay', 'Pay')}</button>
+                    <button class="btn btn-primary btn-sm" onclick="openSubmitClaimModal(${p.id})">${t('btn_file_claim', 'Claim')}</button>
                 </td>
             </tr>
         `;
@@ -272,15 +272,16 @@ async function renderDashboardView(container) {
 }
 
 /* 2. CUSTOMERS VIEW */
+/* 2. CUSTOMERS VIEW */
 async function renderCustomersView(container) {
     const customers = await API.getCustomers();
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Customer Management</h1>
-                <p class="page-subtitle">Register and manage insured policyholders</p>
+                <h1 class="page-title">${t('cust_title', 'Customer Management')}</h1>
+                <p class="page-subtitle">${t('cust_subtitle', 'Register and manage insured policyholders')}</p>
             </div>
-            <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Register Customer</button>
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">${t('btn_add_customer', '+ Register Customer')}</button>
         </div>
         <div class="controls-bar">
             <div class="search-group">
@@ -291,13 +292,13 @@ async function renderCustomersView(container) {
             <table class="data-table" id="customers-table">
                 <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>City / State</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('tbl_code', 'Code')}</th>
+                        <th>${t('tbl_name', 'Full Name')}</th>
+                        <th>${t('tbl_email', 'Email')}</th>
+                        <th>${t('tbl_phone', 'Phone')}</th>
+                        <th>${t('tbl_city', 'City / State')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
+                        <th>${t('tbl_actions', 'Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -313,7 +314,7 @@ async function renderCustomersView(container) {
                 <td>${c.city || 'N/A'}, ${c.state || ''}</td>
                 <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">Delete</button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">${t('btn_delete', 'Delete')}</button>
                 </td>
             </tr>
         `;
@@ -335,7 +336,7 @@ async function filterCustomers() {
             <td>${c.phone}</td>
             <td>${c.city || 'N/A'}, ${c.state || ''}</td>
             <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
-            <td><button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">Delete</button></td>
+            <td><button class="btn btn-secondary btn-sm" onclick="deleteCustomer(${c.id})">${t('btn_delete', 'Delete')}</button></td>
         </tr>
     `).join('');
 }
@@ -346,22 +347,22 @@ async function renderAgentsView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Agent Directory</h1>
-                <p class="page-subtitle">Manage insurance brokers and underwriters</p>
+                <h1 class="page-title">${t('agt_title', 'Agent Directory')}</h1>
+                <p class="page-subtitle">${t('agt_subtitle', 'Manage insurance brokers and underwriters')}</p>
             </div>
-            <button class="btn btn-primary" onclick="openAddAgentModal()">+ Add Agent</button>
+            <button class="btn btn-primary" onclick="openAddAgentModal()">${t('btn_add_agent', '+ Add Agent')}</button>
         </div>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Agent Code</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Agency Name</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('tbl_code', 'Agent Code')}</th>
+                        <th>${t('tbl_name', 'Name')}</th>
+                        <th>${t('tbl_email', 'Email')}</th>
+                        <th>${t('tbl_phone', 'Phone')}</th>
+                        <th>${t('tbl_agency', 'Agency Name')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
+                        <th>${t('tbl_actions', 'Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -376,7 +377,7 @@ async function renderAgentsView(container) {
                 <td>${a.phone}</td>
                 <td>${a.agencyName || 'Independent'}</td>
                 <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
-                <td><button class="btn btn-secondary btn-sm" onclick="deleteAgent(${a.id})">Delete</button></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="deleteAgent(${a.id})">${t('btn_delete', 'Delete')}</button></td>
             </tr>
         `;
     });
@@ -391,24 +392,24 @@ async function renderPoliciesView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Policy Lifecycle Management</h1>
-                <p class="page-subtitle">Create, monitor, and update active policy contracts</p>
+                <h1 class="page-title">${t('pol_title', 'Policy Lifecycle Management')}</h1>
+                <p class="page-subtitle">${t('pol_subtitle', 'Create, monitor, and update active policy contracts')}</p>
             </div>
-            <button class="btn btn-primary" onclick="openCreatePolicyModal()">+ Issue Policy</button>
+            <button class="btn btn-primary" onclick="openCreatePolicyModal()">${t('btn_issue_policy', '+ Issue Policy')}</button>
         </div>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Policy #</th>
-                        <th>Customer</th>
-                        <th>Agent</th>
-                        <th>Category</th>
-                        <th>Coverage</th>
-                        <th>Premium</th>
-                        <th>Expiry</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('tbl_policy_num', 'Policy #')}</th>
+                        <th>${t('tbl_customer', 'Customer')}</th>
+                        <th>${t('tbl_agent', 'Agent')}</th>
+                        <th>${t('tbl_category', 'Category')}</th>
+                        <th>${t('tbl_coverage', 'Coverage')}</th>
+                        <th>${t('tbl_premium', 'Premium')}</th>
+                        <th>${t('tbl_expiry', 'Expiry')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
+                        <th>${t('tbl_actions', 'Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -426,8 +427,8 @@ async function renderPoliciesView(container) {
                 <td>${p.expiryDate}</td>
                 <td><span class="badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="openRenewModal(${p.id})">Renew</button>
-                    <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal(${p.id})">Pay</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openRenewModal(${p.id})">${t('btn_renew', 'Renew')}</button>
+                    <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal(${p.id})">${t('btn_pay', 'Pay')}</button>
                 </td>
             </tr>
         `;
@@ -443,23 +444,23 @@ async function renderClaimsView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Claims & Assessment Management</h1>
-                <p class="page-subtitle">Process incoming claims, technical assessments, and settlements</p>
+                <h1 class="page-title">${t('clm_title', 'Claims & Assessment Management')}</h1>
+                <p class="page-subtitle">${t('clm_subtitle', 'Process incoming claims, technical assessments, and settlements')}</p>
             </div>
-            <button class="btn btn-primary" onclick="openSubmitClaimModal()">+ File New Claim</button>
+            <button class="btn btn-primary" onclick="openSubmitClaimModal()">${t('btn_file_claim', '+ File New Claim')}</button>
         </div>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Claim #</th>
-                        <th>Policy #</th>
-                        <th>Customer</th>
-                        <th>Amount Claimed</th>
-                        <th>Incident Date</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('tbl_claim_num', 'Claim #')}</th>
+                        <th>${t('tbl_policy_num', 'Policy #')}</th>
+                        <th>${t('tbl_customer', 'Customer')}</th>
+                        <th>${t('tbl_amount_claimed', 'Amount Claimed')}</th>
+                        <th>${t('tbl_incident_date', 'Incident Date')}</th>
+                        <th>${t('tbl_priority', 'Priority')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
+                        <th>${t('tbl_actions', 'Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -476,8 +477,8 @@ async function renderClaimsView(container) {
                 <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
                 <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="openAssessModal(${c.id}, ${c.claimAmount})">Assess</button>
-                    <button class="btn btn-primary btn-sm" onclick="openSettleModal(${c.id}, ${c.claimAmount})">Settle</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openAssessModal(${c.id}, ${c.claimAmount})">${t('btn_assess', 'Assess')}</button>
+                    <button class="btn btn-primary btn-sm" onclick="openSettleModal(${c.id}, ${c.claimAmount})">${t('btn_settle', 'Settle')}</button>
                 </td>
             </tr>
         `;
@@ -493,23 +494,23 @@ async function renderPaymentsView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Premium Payment Ledger</h1>
-                <p class="page-subtitle">Track premium collection transactions and transaction references</p>
+                <h1 class="page-title">${t('pay_title', 'Premium Payment Ledger')}</h1>
+                <p class="page-subtitle">${t('pay_subtitle', 'Track premium collection transactions and transaction references')}</p>
             </div>
-            <button class="btn btn-primary" onclick="openRecordPaymentModal()">+ Record Payment</button>
+            <button class="btn btn-primary" onclick="openRecordPaymentModal()">${t('btn_record_payment', '+ Record Payment')}</button>
         </div>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Payment #</th>
-                        <th>Policy #</th>
-                        <th>Customer</th>
-                        <th>Amount Paid</th>
-                        <th>Method</th>
+                        <th>${t('tbl_receipt', 'Payment #')}</th>
+                        <th>${t('tbl_policy_num', 'Policy #')}</th>
+                        <th>${t('tbl_customer', 'Customer')}</th>
+                        <th>${t('tbl_amount', 'Amount Paid')}</th>
+                        <th>${t('tbl_method', 'Method')}</th>
                         <th>Txn Ref</th>
-                        <th>Date</th>
-                        <th>Status</th>
+                        <th>${t('tbl_date', 'Date')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -540,21 +541,21 @@ async function renderRenewalsView(container) {
     let html = `
         <div class="page-header">
             <div>
-                <h1 class="page-title">Policy Renewal History</h1>
-                <p class="page-subtitle">Log of automated and agent-processed contract term extensions</p>
+                <h1 class="page-title">${t('rnw_title', 'Policy Renewal History')}</h1>
+                <p class="page-subtitle">${t('rnw_subtitle', 'Log of automated and agent-processed contract term extensions')}</p>
             </div>
         </div>
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Renewal #</th>
-                        <th>Policy #</th>
-                        <th>Previous Expiry</th>
-                        <th>New Expiry</th>
-                        <th>Renewal Premium</th>
-                        <th>Processed Date</th>
-                        <th>Status</th>
+                        <th>${t('tbl_code', 'Renewal #')}</th>
+                        <th>${t('tbl_policy_num', 'Policy #')}</th>
+                        <th>${t('tbl_expiry', 'Previous Expiry')}</th>
+                        <th>${t('tbl_expiry', 'New Expiry')}</th>
+                        <th>${t('tbl_premium', 'Renewal Premium')}</th>
+                        <th>${t('tbl_date', 'Processed Date')}</th>
+                        <th>${t('tbl_status', 'Status')}</th>
                     </tr>
                 </thead>
                 <tbody>

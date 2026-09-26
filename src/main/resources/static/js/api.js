@@ -192,5 +192,17 @@ const API = {
         const query = new URLSearchParams(params).toString();
         const res = await fetch(`${API_BASE}/dsa/${concept}?${query}`);
         return res.json();
+    },
+
+    // Chatbot Endpoint
+    async sendChatMessage(data) {
+        const res = await fetch(`${API_BASE}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to get chatbot response');
+        return res.json();
     }
 };
+
